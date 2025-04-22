@@ -122,7 +122,10 @@ def exit():
 def open_new_window():
     global targetNote
     w2var = StringVar()
-    w2var.set("No current target note")
+    if len(targetNote) == 0:
+        w2var.set("No target note entered")
+    else:
+        w2var.set(f"Current target note: {targetNote}")
     new_window = Toplevel(root)
     new_window.title("Target Note Window")
     new_window.geometry("300x300")
@@ -134,12 +137,16 @@ def open_new_window():
     def textSubmit():
         global targetNote
         targetNote = txt.get()
-        w2var.set(str(targetNote))
+        if len(targetNote) == 0:
+            w2var.set("No target note entered")
+        else:
+            w2var.set(str(f"Current target note: {targetNote}"))
+        w2TargetVar.set(str(targetNote))
 
     def w2exit():
         new_window.destroy()
 
-    txt = Entry(new_window, width=30)
+    txt = Entry(new_window, width=30, text=targetNote)
     txt.grid(row=1,column=0,sticky="NW")
 
     submit_btn = tk.Button(new_window, text="Submit", width=5, command=textSubmit)
@@ -151,9 +158,8 @@ def open_new_window():
     exit_button = tk.Button(new_window, text="Exit", width=5, command=w2exit, activeforeground="white", fg="white", bg="#900029", activebackground="#b70034")
     exit_button.grid(row=3,column=0, sticky="E",pady=(180,0),padx=(0,3))
 
-
-
 root.protocol('WM_DELETE_WINDOW', exit)
+
 
 
 # print(f"Current note: {current}")
@@ -185,8 +191,14 @@ label2.grid(row=1,column=0,sticky='',pady=(150,0))
 
 
 # new window button:
+w2TargetVar = StringVar()
+w2TargetVar.set(str(targetNote))
+
 w2button = tk.Button(text="Add Target", width=10, command=open_new_window)
-w2button.grid(row=0,column=0,sticky="W")
+w2button.grid(row=0,column=0,sticky="W",pady=(3,0),padx=(3,0))
+
+w2labelTarget = Label(textvariable=w2TargetVar, font='Ariel 17 bold', width=8, fg="blue")
+w2labelTarget.grid(row=1,column=0,sticky="NW",pady=(0,100),padx=(0,0))
 
 
 
