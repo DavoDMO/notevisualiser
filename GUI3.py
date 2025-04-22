@@ -137,7 +137,7 @@ def open_new_window():
     txt = Entry(new_window, width=30)
     txt.grid(row=1,column=0)
 
-    submit_btn = tk.Button(new_window, text="Submit", width=5, command=textSubmit)
+    submit_btn = tk.Button(new_window, text="Submit", width=5, command=textSubmit, bg="blue")
     submit_btn.grid(row=2,column=0,sticky="W")
 
     txtLabel = Label(new_window, textvariable=w2var, font='Ariel 17 bold')
