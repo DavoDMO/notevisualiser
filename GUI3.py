@@ -13,8 +13,8 @@ root_width, root_height = 500, 400
 root.minsize(root_width,root_height)
 root.grid_columnconfigure(0, weight=1)
 
-frame1=Frame(root)
-frame1.grid(row=0,column=0)
+#frame1=Frame(root)
+#frame1.grid(row=0,column=0)
 
 frame2=Frame(root)
 frame2.grid(row=1,column=0)
@@ -24,6 +24,11 @@ var.set("Current Note: ...")
 
 var2 = StringVar()
 var2.set("...")
+
+var3 = StringVar()
+var3.set("Type some text...")
+
+
 
 current = None # Shared variable
 running = True # used to stop loop with button
@@ -111,6 +116,35 @@ def exit():
     running = False
     root.destroy()
 
+
+
+
+
+# second window (w2) stuff:
+def open_new_window():
+    w2var = StringVar()
+    w2var.set("No current target note")
+
+    new_window = Toplevel(root)
+    new_window.title("Target Note Window")
+    new_window.geometry("300x300")
+
+    # text box stuff:
+    def textSubmit():
+        input = txt.get()
+        w2var.set(str(input))
+
+    txt = Entry(new_window, width=30)
+    txt.grid(row=1,column=0)
+
+    submit_btn = tk.Button(new_window, text="Submit", width=5, command=textSubmit)
+    submit_btn.grid(row=2,column=0,sticky="W")
+
+    txtLabel = Label(new_window, textvariable=w2var, font='Ariel 17 bold')
+    txtLabel.grid(row=0,column=0,sticky='N',pady=(0,0))
+
+
+
 root.protocol('WM_DELETE_WINDOW', exit)
 
 
@@ -126,6 +160,30 @@ label2 = Label(textvariable=var2, font='Ariel 17 bold')
 #label2.grid(row=1,column=1,pady=(105,0),padx=(45,0))
 label2.grid(row=1,column=0,sticky='',pady=(150,0))
 
+
+
+
+# # text box stuff:
+# txt = Entry(root, width=30)
+# txt.grid(row=1,column=0)
+
+# submit_btn = tk.Button(text="Submit", width=5, command=textSubmit)
+# submit_btn.grid(row=1,column=0,sticky="W")
+
+# txtLabel = Label(textvariable=var3, font='Ariel 17 bold')
+# txtLabel.grid(row=1,column=0,sticky='N',pady=(0,0))
+
+
+
+
+# new window button:
+w2button = tk.Button(text="Open new window", width=5, command=open_new_window)
+w2button.grid(row=2,column=0,sticky="N")
+
+
+
+
+# start, stop and exit buttons:
 start_button = tk.Button(text="Start", width=5, command=start_note_thread, activeforeground="black", fg="black", bg="#00b720", activebackground="#00df27")
 start_button.grid(column=0, row=2, sticky="W",pady=(150,0),padx=(4,0))
 
