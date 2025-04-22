@@ -4,6 +4,7 @@ from aubioAlgo import *
 import time
 import threading
 import json
+from music21 import pitch
 
 # Creating GUI
 root = tk.Tk()
@@ -32,7 +33,7 @@ var3.set("Type some text...")
 
 current = None # Shared variable
 running = True # used to stop loop with button
-targetNote = ""
+targetNote = None
 
 
 def get_current_note(): # Function from aubioAlgo.py
@@ -122,10 +123,10 @@ def exit():
 def open_new_window():
     global targetNote
     w2var = StringVar()
-    if len(targetNote) == 0:
+    if targetNote == None:
         w2var.set("No target note entered")
     else:
-        w2var.set(f"Current target note: {targetNote}")
+        w2var.set(f"Current target note: {targetNote.nameWithOctave}")
     new_window = Toplevel(root)
     new_window.title("Target Note Window")
     new_window.geometry("300x300")
@@ -135,13 +136,16 @@ def open_new_window():
 
     # text box stuff:
     def textSubmit():
-        global targetNote
-        targetNote = txt.get()
-        if len(targetNote) == 0:
-            w2var.set("No target note entered")
-        else:
-            w2var.set(str(f"Current target note: {targetNote}"))
-        w2TargetVar.set(str(targetNote))
+        global targetNote # sets global variable to be accessed outside
+        note_input = txt.get() # gets input from textbox
+
+        try:
+            targetNote = pitch.Pitch(note_input) # converts textbox input to pitch.Pitch so it can be compared
+            w2var.set(str(f"Current target note: {targetNote.nameWithOctave}")) # displaying target note in current GUI
+            w2TargetVar.set(targetNote.nameWithOctave) # displaying taret note in main GUI
+        except Exception as e:
+            w2var.set("Invalid note input") # error message for invalid input
+            print("Error:", e) # printing error message
 
     def w2exit():
         new_window.destroy()
