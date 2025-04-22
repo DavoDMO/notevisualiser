@@ -13,8 +13,8 @@ root_width, root_height = 500, 400
 root.minsize(root_width,root_height)
 root.grid_columnconfigure(0, weight=1)
 
-#frame1=Frame(root)
-#frame1.grid(row=0,column=0)
+frame1=Frame(root)
+frame1.grid(row=0,column=0)
 
 frame2=Frame(root)
 frame2.grid(row=1,column=0)
@@ -32,6 +32,8 @@ var3.set("Type some text...")
 
 current = None # Shared variable
 running = True # used to stop loop with button
+targetNote = ""
+
 
 def get_current_note(): # Function from aubioAlgo.py
     global current
@@ -116,32 +118,38 @@ def exit():
     running = False
     root.destroy()
 
-
-
-
-
 # second window (w2) stuff:
 def open_new_window():
+    global targetNote
     w2var = StringVar()
     w2var.set("No current target note")
-
     new_window = Toplevel(root)
     new_window.title("Target Note Window")
     new_window.geometry("300x300")
+    new_window_width, new_window_height = 300, 300
+    new_window.minsize(new_window_height,new_window_width)
+    new_window.grid_columnconfigure(0, weight=1)
 
     # text box stuff:
     def textSubmit():
-        input = txt.get()
-        w2var.set(str(input))
+        global targetNote
+        targetNote = txt.get()
+        w2var.set(str(targetNote))
+
+    def w2exit():
+        new_window.destroy()
 
     txt = Entry(new_window, width=30)
-    txt.grid(row=1,column=0)
+    txt.grid(row=1,column=0,sticky="NW")
 
-    submit_btn = tk.Button(new_window, text="Submit", width=5, command=textSubmit, bg="blue")
-    submit_btn.grid(row=2,column=0,sticky="W")
+    submit_btn = tk.Button(new_window, text="Submit", width=5, command=textSubmit)
+    submit_btn.grid(row=2,column=0,sticky="NW",pady=(2,0),padx=(2,0))
 
-    txtLabel = Label(new_window, textvariable=w2var, font='Ariel 17 bold')
-    txtLabel.grid(row=0,column=0,sticky='N',pady=(0,0))
+    txtLabel = Label(new_window, textvariable=w2var, font='Ariel 17 bold', width=20)
+    txtLabel.grid(row=0,column=0,sticky="NESW")
+
+    exit_button = tk.Button(new_window, text="Exit", width=5, command=w2exit, activeforeground="white", fg="white", bg="#900029", activebackground="#b70034")
+    exit_button.grid(row=3,column=0, sticky="E",pady=(180,0),padx=(0,3))
 
 
 
@@ -177,8 +185,8 @@ label2.grid(row=1,column=0,sticky='',pady=(150,0))
 
 
 # new window button:
-w2button = tk.Button(text="Open new window", width=5, command=open_new_window)
-w2button.grid(row=2,column=0,sticky="N")
+w2button = tk.Button(text="Add Target", width=10, command=open_new_window)
+w2button.grid(row=0,column=0,sticky="W")
 
 
 
