@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import *
+from tkinter import ttk
+import tkinter.font as tkFont
 from aubioAlgo import *
 import time
 import threading
@@ -39,6 +41,7 @@ targetNote = None
 def get_current_note(): # Function from aubioAlgo.py
     global current
     global running
+    global targetNote
     pitches = []
     confidences = []
     current_pitch = music21.pitch.Pitch()
@@ -51,6 +54,7 @@ def get_current_note(): # Function from aubioAlgo.py
         #pitch = int(round(pitch))
         confidence = pitch_o.get_confidence()
         #if confidence < 0.8: pitch = 0.
+        
 
 
         pitches += [pitch]
@@ -62,6 +66,65 @@ def get_current_note(): # Function from aubioAlgo.py
             last_note = current_pitch.nameWithOctave
         
         current = last_note if last_note else last_note
+        
+        if targetNote:
+            distance = ""
+            diff_in_cents = (current_pitch.midi - targetNote.midi)*100
+            # setting colours:
+            # NOTES TO SELF:
+                # Exact Match (blue) = 0 cents
+                # Close (Light Red or Light Green (depending if sharp or flat)) = ±100 cents
+                # Medium Far (Medium Red/Green) = ±200 cents
+                # Very Far (Dark Red/Green) = ±300 cents
+            exactMatch = "Exact match" # for testing
+            closeMatch = "Close match" # for testing
+            midFarMatch = "Medium far" # for testing
+            maxFarMatch = "Very far" # for testing
+            wayOff = "Way off" # for testing
+
+            thresholds = [
+                (0, "Exact match"),
+                (100, "Close match"),
+                (200, "Medium far"),
+                (300, "Very far")
+            ]
+            
+            absDiff = abs(diff_in_cents) # setting absolute value
+            distance = "Very far" # setting default value
+
+            for max_cents, label in thresholds:
+                if absDiff <= max_cents:
+                    distance = label
+                    break
+
+            # if absDiff == 0:
+            #     distance = exactMatch
+            # elif absDiff <= 100:
+            #     distance = closeMatch
+            # elif absDiff <= 200:
+            #     distance = midFarMatch
+            # elif absDiff <= 300:
+            #     distance = maxFarMatch
+            # else:
+            #     distance = wayOff
+
+
+            
+            
+            
+
+            
+            
+
+
+
+
+            
+        else:
+            
+            pass
+
+        print("Note difference: ", diff_in_cents)
 
 
 
@@ -84,8 +147,10 @@ def get_current_note(): # Function from aubioAlgo.py
 
 
 
-            
+        print(f"Distance is: {distance}")
+
         print(pitch,'----',current,'----',current_pitch.microtone.cents,'----',str(current_time))
+        
 
         #q.put({'Note': current, 'Cents': current_pitch.microtone.cents,'hz':pitch})
 
@@ -129,8 +194,8 @@ def open_new_window():
         w2var.set(f"Current target note: {targetNote.nameWithOctave}")
     new_window = Toplevel(root)
     new_window.title("Target Note Window")
-    new_window.geometry("300x300")
-    new_window_width, new_window_height = 300, 300
+    new_window.geometry("350x300")
+    new_window_width, new_window_height = 350, 300
     new_window.minsize(new_window_height,new_window_width)
     new_window.grid_columnconfigure(0, weight=1)
 
@@ -150,7 +215,35 @@ def open_new_window():
     def w2exit():
         new_window.destroy()
 
-    txt = Entry(new_window, width=30, text=targetNote)
+        # drop down menu for mouse-only users
+    def mouse_only():
+        def show():
+            ddLbl.config(text=cb.get())
+        # Dropdown options  
+        a = ["A", "B", "C", "D", "E", "F", "G"]
+        b = ["1", "2", "3", "4", "5", "6", "7"]
+        c = ["Sharp", "Flat"]
+        # Combobox
+        #ddLabelFont = tkFont.Font(family="Ariel", size=10)
+        #ddLabel = Label(new_window, text="Select note, sharp/flat, and octave for mouse-only users:", font=ddLabelFont)
+        #ddLabel.grid(row=2,column=0,sticky="NW",pady=(35,0),padx=(30,0))
+        cb = ttk.Combobox(new_window, values=a, width=10)
+        cb.set("Letter")
+        cb.grid(row=2,column=0,sticky="SW",pady=(60,0),padx=(2,0))
+        cb2 = ttk.Combobox(new_window, values=b, width=10)
+        cb2.set("Octave")
+        cb2.grid(row=2,column=0,sticky="SW",pady=(60,0),padx=(110,0))
+        cb3 = ttk.Combobox(new_window, values=c, width=10)
+        cb3.set("Sharp/Flat")
+        cb3.grid(row=2,column=0,sticky="SW",pady=(60,0),padx=(217,0))
+        # Button to display selection  
+        #ddButton = Button(new_window, text="Show Selection", command=show)
+        #ddButton.grid(row=2,column=0,sticky="SW",pady=(80,0))
+        # Label to show selected value  
+        ddLbl = Label(new_window, text=" ")
+        ddLbl.grid(row=2,column=0)
+
+    txt = Entry(new_window, width=25, text=targetNote)
     txt.grid(row=1,column=0,sticky="NW")
 
     submit_btn = tk.Button(new_window, text="Submit", width=5, command=textSubmit)
@@ -168,8 +261,6 @@ root.protocol('WM_DELETE_WINDOW', exit)
 
 # print(f"Current note: {current}")
 # get_current_note()
-
-
 
 label = Label(textvariable=var, font='Ariel 17 bold')
 label.grid(row=0,column=0,sticky='N',pady=(0,0))

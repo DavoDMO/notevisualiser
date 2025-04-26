@@ -1,28 +1,25 @@
 from tkinter import *
-from tkinter.ttk import *
+from tkinter import ttk
 
-# Create the main window
-master = Tk()
-master.geometry("300x200")  # Set window size
-master.title("Main Window")
-var = StringVar()
-var.set("Test label")
+root = Tk()
+root.geometry("200x200")
 
-# Function to open a new window
-def open_new_window():
-    new_window = Toplevel(master)  # Create a new window
-    new_window.title("New Window")
-    new_window.geometry("250x150")  
+def show():
+    lbl.config(text=cb.get())
 
-    label = Label(new_window,textvariable=var, text="This is a new window").pack(pady=20)
-    Button(new_window, text="Submit", command=submit).pack(pady=10)
+# Dropdown options  
+a = ["Apple", "Banana", "Cherry", "Date", "Elderberry"]
 
-    def submit():
-        var.set("Button been pressed broski")
+# Combobox  
+cb = ttk.Combobox(root, values=a)
+cb.set("Select a fruit")
+cb.pack()
 
-# Create a label and a button to open the new window
-Label(master, text="This is the main window").pack(pady=10)
-Button(master, text="Open New Window", command=open_new_window).pack(pady=10)
+# Button to display selection  
+Button(root, text="Show Selection", command=show).pack()
 
-# Run the Tkinter event loop
-master.mainloop()
+# Label to show selected value  
+lbl = Label(root, text=" ")
+lbl.pack()
+
+root.mainloop()
