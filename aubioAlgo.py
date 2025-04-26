@@ -22,17 +22,25 @@ samplerate = 48000
 
 current_time = datetime.now()
 
-win_s = 512 
-hop_s = 512 
+win_s = 2048
+hop_s = 512
 
 tolerance = 0.8
 
-pitch_o = pitch("default",win_s,hop_s,samplerate)
+pitch_o = pitch("yin",win_s,hop_s,samplerate)
 #pitch_o.set_unit("")
 pitch_o.set_tolerance(tolerance)
 
 # total number of frames read
 total_frames = 0
+
+
+
+
+
+
+
+
 # def get_current_note():
 #     pitches = []
 #     confidences = []

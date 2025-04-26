@@ -5,7 +5,6 @@ import tkinter.font as tkFont
 from aubioAlgo import *
 import time
 import threading
-import json
 from music21 import pitch
 
 # Creating GUI
@@ -39,7 +38,6 @@ targetNote = None
 final_colour = "#00AFFF"
 upordown_teller = ""
 
-
 def get_current_note(): # Function from aubioAlgo.py
     global current
     global running
@@ -48,17 +46,28 @@ def get_current_note(): # Function from aubioAlgo.py
     global upordown_teller
     pitches = []
     confidences = []
+    recent_pitches = []  # store last few good pitches
+    max_recent_pitches = 5  # how many to keep for averaging
     current_pitch = music21.pitch.Pitch()
     last_note = None
 
     while running:
         data = stream.read(hop_s, exception_on_overflow=False)
-        samples = np.fromstring(data,dtype=aubio.float_type)  
+        samples = np.frombuffer(data, dtype=aubio.float_type)  
         pitch = (pitch_o(samples)[0])
-        #pitch = int(round(pitch))
         confidence = pitch_o.get_confidence()
-        #if confidence < 0.8: pitch = 0.
         
+        if confidence > 0.9 and pitch > 0:
+            recent_pitches.append(pitch)
+            if len(recent_pitches) > max_recent_pitches:
+                recent_pitches.pop(0)
+            avg_pitch = sum(recent_pitches) / len(recent_pitches)
+
+            current_pitch.frequency = avg_pitch
+            last_note = current_pitch.nameWithOctave
+
+        # update global "current" whether or not you have a good note
+        current = last_note if last_note else None
 
 
         pitches += [pitch]
@@ -66,7 +75,6 @@ def get_current_note(): # Function from aubioAlgo.py
         # current='Nan'
         if pitch>0:
             current_pitch.frequency = float(pitch)
-            # current=current_pitch.nameWithOctave
             last_note = current_pitch.nameWithOctave
         
         current = last_note if last_note else last_note
@@ -81,10 +89,14 @@ def get_current_note(): # Function from aubioAlgo.py
                 # Medium Far (Medium Red/Green) = ±200 cents
                 # Very Far (Dark Red/Green) = ±300 cents
             
+            tolerance_buffer = 1
+            
             exactText = "Spot On"
             tooHighText = "Too High, Go A Bit Lower"
             tooLowText = "Too Low, Go A Bit Higher"
             
+            if abs(diff_in_cents) <= tolerance_buffer:
+                upordown_teller = exactText
             if diff_in_cents > 0:
                 upordown_teller = tooHighText
             elif diff_in_cents < 0:
@@ -146,21 +158,21 @@ def get_current_note(): # Function from aubioAlgo.py
 
 
 
-        # Data to be written
-        dictionary = current
+        # # Data to be written
+        # dictionary = current
         
-        # Serializing json
-        json_object = json.dumps(dictionary, indent=0)
+        # # Serializing json
+        # json_object = json.dumps(dictionary, indent=0)
 
-        # Writing to sample.json
-        if current != "null":
-            with open("sample.json", "w") as outfile:
-                outfile.write(json_object)
+        # # Writing to sample.json
+        # if current != "null":
+        #     with open("sample.json", "w") as outfile:
+        #         outfile.write(json_object)
 
-        if current == "null":
-            with open("sample.json", "r") as openfile:
-                json_object = json.load(openfile)
-                print(f"Json file: {json_object}")
+        # if current == "null":
+        #     with open("sample.json", "r") as openfile:
+        #         json_object = json.load(openfile)
+        #         print(f"Json file: {json_object}")
 
 
 
