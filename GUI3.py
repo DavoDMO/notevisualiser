@@ -32,16 +32,20 @@ var3 = StringVar()
 var3.set("Type some text...")
 
 
-
+# global variables
 current = None # Shared variable
 running = True # used to stop loop with button
 targetNote = None
+final_colour = "#00AFFF"
+upordown_teller = ""
 
 
 def get_current_note(): # Function from aubioAlgo.py
     global current
     global running
     global targetNote
+    global final_colour
+    global upordown_teller
     pitches = []
     confidences = []
     current_pitch = music21.pitch.Pitch()
@@ -76,11 +80,31 @@ def get_current_note(): # Function from aubioAlgo.py
                 # Close (Light Red or Light Green (depending if sharp or flat)) = ±100 cents
                 # Medium Far (Medium Red/Green) = ±200 cents
                 # Very Far (Dark Red/Green) = ±300 cents
-            exactMatch = "Exact match" # for testing
-            closeMatch = "Close match" # for testing
-            midFarMatch = "Medium far" # for testing
-            maxFarMatch = "Very far" # for testing
-            wayOff = "Way off" # for testing
+            
+            exactText = "Spot On"
+            tooHighText = "Too High, Go A Bit Lower"
+            tooLowText = "Too Low, Go A Bit Higher"
+            
+            if diff_in_cents > 0:
+                upordown_teller = tooHighText
+            elif diff_in_cents < 0:
+                upordown_teller = tooLowText
+            else:
+                upordown_teller = exactText
+
+            # base colours:
+            exactColour = "00AFFF" # blue
+            tooHigh = "00FF00" # green
+            tooLow = "FF0000" # red
+
+            def hex_to_rgb(hex_color): # converting hex colours to RGB tuples
+                hex_color = hex_color.lstrip('#')  # removes '#' if it exists
+                return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+            
+            # converting base colours for blending setup
+            exactColour_rgb = hex_to_rgb(exactColour)
+            tooHigh_rgb = hex_to_rgb(tooHigh)
+            tooLow_rgb = hex_to_rgb(tooLow)
 
             thresholds = [
                 (0, "Exact match"),
@@ -92,38 +116,32 @@ def get_current_note(): # Function from aubioAlgo.py
             absDiff = abs(diff_in_cents) # setting absolute value
             distance = "Very far" # setting default value
 
-            for max_cents, label in thresholds:
+            for max_cents, label in thresholds: # for number and text (max_cents and label) set in thresholds
                 if absDiff <= max_cents:
                     distance = label
                     break
-
-            # if absDiff == 0:
-            #     distance = exactMatch
-            # elif absDiff <= 100:
-            #     distance = closeMatch
-            # elif absDiff <= 200:
-            #     distance = midFarMatch
-            # elif absDiff <= 300:
-            #     distance = maxFarMatch
-            # else:
-            #     distance = wayOff
-
-
             
-            
-            
+            if diff_in_cents > 0:
+                base_colour_rgb = tooHigh_rgb
+            elif diff_in_cents < 0:
+                base_colour_rgb = tooLow_rgb
+            else:
+                base_colour_rgb = exactColour_rgb
 
+            # how much to blend towards blue
+            t = min(absDiff / 300, 1.0) # calculating blend factor
             
-            
+            # blending setup:
+            r= int((1 - t) * exactColour_rgb[0] + t * base_colour_rgb[0])
+            g= int((1 - t) * exactColour_rgb[1] + t * base_colour_rgb[1])
+            b= int((1 - t) * exactColour_rgb[2] + t * base_colour_rgb[2])
+
+            final_colour = '#{:02x}{:02x}{:02x}'.format(r, g, b)
 
 
-
-
-            
-        else:
-            
+        else:  
             pass
-
+        
         print("Note difference: ", diff_in_cents)
 
 
@@ -166,6 +184,8 @@ def get_current_note(): # Function from aubioAlgo.py
 def update_gui():
     var.set("Current Note:")
     var2.set(str(current))
+    label2.config(fg=final_colour)
+    upDownVar.set(str(upordown_teller))
     root.after(500, update_gui)
 
 def start_note_thread():
@@ -269,7 +289,10 @@ label2 = Label(textvariable=var2, font='Ariel 17 bold')
 #label2.grid(row=1,column=1,pady=(105,0),padx=(45,0))
 label2.grid(row=1,column=0,sticky='',pady=(150,0))
 
-
+upDownVar = StringVar()
+upDownVar.set("...")
+upDownLabel = Label(textvariable=upDownVar, font='Ariel 17 bold')
+upDownLabel.grid(row=0,column=0,sticky='N',pady=(50,0))
 
 
 # # text box stuff:
