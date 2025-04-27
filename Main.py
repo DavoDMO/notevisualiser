@@ -37,6 +37,8 @@ running = True # used to stop loop with button
 targetNote = None
 final_colour = "#00AFFF"
 upordown_teller = ""
+upDownBackground = None
+label2Background = None
 
 def get_current_note(): # Function from aubioAlgo.py
     global current
@@ -44,6 +46,8 @@ def get_current_note(): # Function from aubioAlgo.py
     global targetNote
     global final_colour
     global upordown_teller
+    global upDownBackground
+    global label2Background
     pitches = []
     confidences = []
     recent_pitches = []  # store last few good pitches
@@ -69,7 +73,6 @@ def get_current_note(): # Function from aubioAlgo.py
         # update global "current" whether or not you have a good note
         current = last_note if last_note else None
 
-
         pitches += [pitch]
         confidences += [confidence]
         # current='Nan'
@@ -81,6 +84,8 @@ def get_current_note(): # Function from aubioAlgo.py
         
         if targetNote:
             distance = ""
+            upDownBackground = "#686A6C"
+            label2Background = "#ada9a9"
             diff_in_cents = (current_pitch.midi - targetNote.midi)*100
             # setting colours:
             # NOTES TO SELF:
@@ -150,53 +155,22 @@ def get_current_note(): # Function from aubioAlgo.py
 
             final_colour = '#{:02x}{:02x}{:02x}'.format(r, g, b)
 
-
         else:  
             pass
         
         print("Note difference: ", diff_in_cents)
-
-
-
-        # # Data to be written
-        # dictionary = current
-        
-        # # Serializing json
-        # json_object = json.dumps(dictionary, indent=0)
-
-        # # Writing to sample.json
-        # if current != "null":
-        #     with open("sample.json", "w") as outfile:
-        #         outfile.write(json_object)
-
-        # if current == "null":
-        #     with open("sample.json", "r") as openfile:
-        #         json_object = json.load(openfile)
-        #         print(f"Json file: {json_object}")
-
-
-
-
         print(f"Distance is: {distance}")
-
         print(pitch,'----',current,'----',current_pitch.microtone.cents,'----',str(current_time))
-        
-
-        #q.put({'Note': current, 'Cents': current_pitch.microtone.cents,'hz':pitch})
 
         time.sleep(0.25)
-        #break
-        #print(f"Current note: {current}")
-
-
- 
 
 
 
 def update_gui():
     var.set("Current Note:")
     var2.set(str(current))
-    label2.config(fg=final_colour)
+    label2.config(fg=final_colour,bg=label2Background)
+    upDownLabel.config(fg=final_colour,bg=upDownBackground)
     upDownVar.set(str(upordown_teller))
     root.after(500, update_gui)
 
@@ -235,7 +209,6 @@ def open_new_window():
     def textSubmit():
         global targetNote # sets global variable to be accessed outside
         note_input = txt.get() # gets input from textbox
-
         try:
             targetNote = pitch.Pitch(note_input) # converts textbox input to pitch.Pitch so it can be compared
             w2var.set(str(f"Current target note: {targetNote.nameWithOctave}")) # displaying target note in current GUI
@@ -247,7 +220,7 @@ def open_new_window():
     def w2exit():
         new_window.destroy()
 
-        # drop down menu for mouse-only users
+    # drop down menu for mouse-only users
     def mouse_only():
         def show():
             ddLbl.config(text=cb.get())
@@ -291,34 +264,16 @@ root.protocol('WM_DELETE_WINDOW', exit)
 
 
 
-# print(f"Current note: {current}")
-# get_current_note()
-
 label = Label(textvariable=var, font='Ariel 17 bold')
 label.grid(row=0,column=0,sticky='N',pady=(0,0))
 
 label2 = Label(textvariable=var2, font='Ariel 17 bold')
-#label2.grid(row=1,column=1,pady=(105,0),padx=(45,0))
 label2.grid(row=1,column=0,sticky='',pady=(150,0))
 
 upDownVar = StringVar()
 upDownVar.set("...")
 upDownLabel = Label(textvariable=upDownVar, font='Ariel 17 bold')
-upDownLabel.grid(row=0,column=0,sticky='N',pady=(50,0))
-
-
-# # text box stuff:
-# txt = Entry(root, width=30)
-# txt.grid(row=1,column=0)
-
-# submit_btn = tk.Button(text="Submit", width=5, command=textSubmit)
-# submit_btn.grid(row=1,column=0,sticky="W")
-
-# txtLabel = Label(textvariable=var3, font='Ariel 17 bold')
-# txtLabel.grid(row=1,column=0,sticky='N',pady=(0,0))
-
-
-
+upDownLabel.grid(row=1,column=0,sticky='N',pady=(50,0))
 
 # new window button:
 w2TargetVar = StringVar()
@@ -329,9 +284,6 @@ w2button.grid(row=0,column=0,sticky="W",pady=(3,0),padx=(3,0))
 
 w2labelTarget = Label(textvariable=w2TargetVar, font='Ariel 17 bold', width=8, fg="blue")
 w2labelTarget.grid(row=1,column=0,sticky="NW",pady=(0,100),padx=(0,0))
-
-
-
 
 # start, stop and exit buttons:
 start_button = tk.Button(text="Start", width=5, command=start_note_thread, activeforeground="black", fg="black", bg="#00b720", activebackground="#00df27")
@@ -344,34 +296,9 @@ exit_button = tk.Button(text="Exit", width=5, command=exit, activeforeground="wh
 exit_button.grid(column=0, row=2, sticky="E",pady=(150,0),padx=(0,5))
 
 
-#stop_button = tk.Button(root, text="Stop", command=stop, activeforeground="black", fg="black", bg="#00beb2", activebackground="#00d1c4")
-#stop_button.grid(row=5,column=1,pady=(230,0),padx=(15,0))
 
-#exit_button = tk.Button(root, text="Exit", command=exit, activeforeground="white", fg="white", bg="#900029", activebackground="#b70034")
-#exit_button.grid(row=5,column=2,pady=(230,0),padx=(24,0))
 
 
 update_gui()
-
 root.mainloop()
-
 get_current_note()
-
-# button = Button(root, text="Count", command=get_current_note)
-# button.pack()
-
-# root.mainloop()
-
-
-
-# def clicked():
-#     lbl.configure(text = "Button got clicked")
-
-# lbl = Label(root, text = "Current Detected Note:")
-# lbl.grid()
-
-# btn = Button(root, text = "Close Window" ,
-#              fg = "red", command=root.destroy)
-# btn.grid(column=0, row=6)
-
-#root.mainloop()
